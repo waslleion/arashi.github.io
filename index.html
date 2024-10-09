@@ -1,46 +1,36 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF テスト</title>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <title>LIFF App</title>
+    <script src="https://liff.line.me/2.1/sdk.js"></script>
     <script>
-        // LIFFアプリを初期化
-        function initializeApp(liffId) {
-            liff.init({ liffId })
+        function initializeLiff(myLiffId) {
+            liff.init({ liffId: myLiffId })
                 .then(() => {
-                    // LIFFの初期化が成功したら、ボタンのイベントリスナーを追加
-                    document.getElementById('sendButton').addEventListener('click', sendMessage);
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    }
                 })
-                .catch((err) => {
-                    console.error('LIFF Initialization failed: ', err);
-                });
+                .catch(err => console.error(err));
         }
 
-        // メッセージを送信する関数
-        function sendMessage() {
-            const messages = Array(10).fill('テスト');
-            liff.sendMessages(messages.map((text) => ({
-                type: 'text',
-                text: text,
-            })))
-            .then(() => {
-                alert('メッセージを送信しました！');
-            })
-            .catch((err) => {
-                console.error('Error sending message: ', err);
+        function sendMessages() {
+            const messages = Array(10).fill({ type: 'text', text: 'テスト' }); // テストメッセージを10回作成
+
+            liff.sendMessages(messages).then(() => {
+                alert('メッセージを10回送信しました！');
+            }).catch(err => {
+                alert('メッセージの送信に失敗しました！');
+                console.error(err);
             });
         }
-
-        window.onload = function() {
-            const liffId = '2006439613-w78QOaDY'; // ここにLIFF IDを入れてな
-            initializeApp(liffId);
-        };
     </script>
 </head>
 <body>
-    <h1>テストメッセージだよ</h1>
-    <button id="sendButton">テストメッセージを送る</button>
+    <h1>LIFFアプリ</h1>
+    <button onclick="sendMessages()">テストメッセージを送信</button>
+    <script>
+        initializeLiff('2006439613-w78QOaDY');
+    </script>
 </body>
 </html>
