@@ -9,17 +9,25 @@
     document.addEventListener("DOMContentLoaded", () => {
       liff
         .init({
-          liffId: '2006439613-w78QOaDY'
+          liffId: '2006439613-w78QOaDY' // ここにLIFF IDを入れる
         })
         .then(() => {
+          // ユーザーがまだログインしていない場合、自動的にログインさせる
+          if (!liff.isLoggedIn()) {
+            liff.login(); // 権限をリクエストする
+          }
+
           document.getElementById('go').addEventListener('click', () => {
             if (!liff.isInClient()) {
               document.getElementById('log').value += 'sendMessagesText ng\n';
             } else {
-              liff.sendMessages([{
+              const messageText = document.getElementById('sendMessagesTextText').value;
+              const messages = Array(10).fill({
                 'type': 'text',
-                'text': document.getElementById('sendMessagesTextText').value
-              }]).then(function() {
+                'text': messageText
+              });
+
+              liff.sendMessages(messages).then(function() {
                 document.getElementById('log').value += 'sendMessagesText completed\n';
               }).catch(function(error) {
                 document.getElementById('log').value += 'sendMessagesText()=' + error + '\n';
