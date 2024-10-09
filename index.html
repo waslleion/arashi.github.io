@@ -1,13 +1,46 @@
-<form id="vote-form">
-  <input type="radio" name="vote" value="option1"> Option 1<br>
-  <input type="radio" name="vote" value="option2"> Option 2<br>
-  <button type="submit">投票する</button>
-</form>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF テスト</title>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script>
+        // LIFFアプリを初期化
+        function initializeApp(liffId) {
+            liff.init({ liffId })
+                .then(() => {
+                    // LIFFの初期化が成功したら、ボタンのイベントリスナーを追加
+                    document.getElementById('sendButton').addEventListener('click', sendMessage);
+                })
+                .catch((err) => {
+                    console.error('LIFF Initialization failed: ', err);
+                });
+        }
 
-<script>
-  document.getElementById('vote-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    // ユーザーの投票データを送信するコードを書く
-    alert('投票が完了しました！');
-  });
-</script>
+        // メッセージを送信する関数
+        function sendMessage() {
+            const messages = Array(10).fill('テスト');
+            liff.sendMessages(messages.map((text) => ({
+                type: 'text',
+                text: text,
+            })))
+            .then(() => {
+                alert('メッセージを送信しました！');
+            })
+            .catch((err) => {
+                console.error('Error sending message: ', err);
+            });
+        }
+
+        window.onload = function() {
+            const liffId = 'YOUR_LIFF_ID'; // ここにLIFF IDを入れてな
+            initializeApp(liffId);
+        };
+    </script>
+</head>
+<body>
+    <h1>テストメッセージ送信</h1>
+    <button id="sendButton">テストメッセージを送る</button>
+</body>
+</html>
