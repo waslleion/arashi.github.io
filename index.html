@@ -1,41 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF Sample</title>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <script>
-        window.onload = function() {
-            liff.init({ liffId: "2006439463-YBVBvLPr" }, () => {
-                if (liff.isLoggedIn()) {
-                    sendMessage();
-                } else {
-                    liff.login();
-                }
-            }, err => console.error(err));
-        };
-
-        function sendMessage() {
-            const message = "指定した文章"; // ここに送信したい文章を書く
-
-            const messages = [
-                { type: 'text', text: message },
-                { type: 'text', text: message },
-                { type: 'text', text: message }
-            ];
-
-            liff.sendMessages(messages)
-                .then(() => {
-                    console.log('メッセージが送信されました！');
-                })
-                .catch(err => {
-                    console.error('メッセージ送信に失敗しました: ', err);
-                });
-        }
-    </script>
-</head>
-<body>
-    <h1>LIFFメッセージ送信</h1>
-</body>
-</html>
+liff
+  .sendMessages([
+    {
+      type: "text",
+      text: "Hello, World!",
+    },
+  ])liff
+  .sendMessages([
+    {
+      type: "text",
+      text: "Hello, World!",
+    },
+  ])
