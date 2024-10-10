@@ -1,67 +1,41 @@
 <!DOCTYPE html>
-<html lang="jp" dir="ltr">
-  <head>
-    <meta charset="utf-8">
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF User Info</title>
+    <title>LIFF Sample</title>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", () => {
-        
-        liff.init({
-          liffId: '2006439463-YBVBvLPr' // LIFF IDを入力
-        })
-        .then(() => {
-          
-          if (!liff.isLoggedIn()) {
-            liff.login(); // ユーザーがログインしていなければログインをリクエスト
-          } else {
-            // ユーザー情報を取得
-            liff.getProfile()
-            .then(profile => {
-              const userInfo = `
-                ユーザー名: ${profile.displayName}
-                ユーザーID: ${profile.userId}
-                プロフィール画像: ${profile.pictureUrl}
-              `;
-              document.getElementById('userInfo').innerText = userInfo;
+    <script>
+        window.onload = function() {
+            liff.init({ liffId: "2006439463-YBVBvLPr" }, () => {
+                if (liff.isLoggedIn()) {
+                    sendMessage();
+                } else {
+                    liff.login();
+                }
+            }, err => console.error(err));
+        };
 
-              // 取得した情報をLINEメッセージとして送信
-              document.getElementById('sendMessage').addEventListener('click', () => {
-                liff.sendMessages([
-                  {
-                    type: 'text',
-                    text: userInfo // 送信するメッセージの内容
-                  }
-                ]).then(() => {
-                  alert('プロフィール情報を送信しました！');
-                }).catch(err => {
-                  alert('メッセージ送信に失敗しました: ' + err);
+        function sendMessage() {
+            const message = "指定した文章"; // ここに送信したい文章を書く
+
+            const messages = [
+                { type: 'text', text: message },
+                { type: 'text', text: message },
+                { type: 'text', text: message }
+            ];
+
+            liff.sendMessages(messages)
+                .then(() => {
+                    console.log('メッセージが送信されました！');
+                })
+                .catch(err => {
+                    console.error('メッセージ送信に失敗しました: ', err);
                 });
-              });
-
-            })
-            .catch(err => {
-              document.getElementById('userInfo').innerText = 'ユーザー情報を取得できませんでした: ' + err;
-            });
-          }
-
-        })
-        .catch((err) => {
-          document.getElementById('log').value = 'init ng\n' + err;
-        });
-
-      });
+        }
     </script>
-  </head>
-  
-  <body>
-    <div>
-      <h3>ユーザー情報</h3>
-      <div id="userInfo"></div>
-      <button id="sendMessage">LINEにプロフィール情報を送る</button>
-      <textarea id="log" style="width:96%;height:100px;"></textarea>
-    </div>
-  </body>
+</head>
+<body>
+    <h1>LIFFメッセージ送信</h1>
+</body>
 </html>
-
