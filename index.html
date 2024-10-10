@@ -3,50 +3,64 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XP LIFF</title>
+    <title>オープンチャット用LIFF</title>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
       liff
         .init({
-          liffId: '2006439463-YBVBvLPr' // ここにLIFF IDを入れる
+          liffId: '2006439463-YBVBvLPr' // LIFF IDをここに入力
         })
         .then(() => {
+          // ユーザーがログインしていない場合はログインを促す
           if (!liff.isLoggedIn()) {
-            liff.login(); // ユーザーにログインさせる
+            liff.login();
+          } else {
+            // 権限が必要な場合は確認
+            checkPermissions();
           }
 
-          document.getElementById('go').addEventListener('click', () => {
-            if (!liff.isInClient()) {
-              document.getElementById('log').value += 'Not in LINE client\n';
-              return;
-            }
-
-            liff.sendMessages([
-              {
-                type: "text",
-                text: "Hello, World!",
-              },
-            ])
-            .then(() => {
-              document.getElementById('log').value += 'Message sent successfully\n';
-            })
-            .catch((error) => {
-              document.getElementById('log').value += 'Error sending message: ' + error + '\n';
-            });
+          document.getElementById('send').addEventListener('click', () => {
+            const messageText = document.getElementById('messageInput').value;
+            sendMessage(messageText);
           });
         })
         .catch((err) => {
-          document.getElementById('log').value = 'init ng\n' + err;
+          console.error('LIFF Initialization failed: ', err);
         });
     });
+
+    function checkPermissions() {
+      liff.getProfile().then(profile => {
+        console.log('ユーザープロフィールを取得しました:', profile);
+      }).catch(error => {
+        console.error('プロフィール取得に失敗:', error);
+      });
+    }
+
+    function sendMessage(message) {
+      if (!liff.isInClient()) {
+        alert('この機能はLINEアプリ内でのみ利用できます。');
+        return;
+      }
+
+      // メッセージ送信
+      liff.sendMessages([{
+        type: 'text',
+        text: message
+      }])
+      .then(() => {
+        console.log('メッセージを送信しました:', message);
+      })
+      .catch((error) => {
+        console.error('メッセージ送信エラー:', error);
+      });
+    }
     </script>
   </head>
   <body>
-    <div>
-      <h3>メッセージを送信する</h3>
-      <input type="button" id="go" value="メッセージ送信"/>
-      <textarea id="log" style="width:96%;height:100px;"></textarea>
-    </div>
+    <h3>オープンチャットでメッセージを送信</h3>
+    <input type="text" id="messageInput" placeholder="メッセージを入力" />
+    <button id="send">送信</button>
   </body>
 </html>
