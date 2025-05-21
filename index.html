@@ -3,281 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>短気の短気による短気のためのベンチマーク</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <title>ベンチマークツール</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
     <style>
+        /* フォントのインポート - 下品な印象を与えるImpact */
+        @import url('https://fonts.googleapis.com/css2?family=Impact&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Impact', sans-serif; /* Impactフォントを使用 */
+            /* 非常に派手で高速なグラデーション背景 */
+            background: linear-gradient(135deg, #FF00FF, #00FFFF, #FF0000, #FFFF00, #00FF00, #0000FF, #FFA500);
+            background-size: 600% 600%; /* グラデーションサイズをさらに大きく */
+            animation: gradientAnimation 8s ease infinite; /* アニメーションをさらに速く */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: auto;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            flex-direction: column;
+            min-height: 100vh;
+            padding: 0.5rem; /* パディングを減らす */
+            box-sizing: border-box;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         .container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.99); /* ほぼ不透明な白 */
+            border-radius: 4rem; /* 極端に丸い角 */
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); /* 非常に強い影 */
+            padding: 4rem; /* パディングを増やす */
+            max-width: 1100px; /* さらに広く */
+            width: 95%; /* 幅を広げる */
             text-align: center;
-            max-width: 95%;
-            width: 800px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 3.5rem; /* ギャップを増やす */
+            border: 10px solid #FFD700; /* 極太のゴールドボーダー */
+            outline: 5px dashed #FF0000; /* さらに外側に赤の点線アウトライン */
+            outline-offset: 10px; /* アウトラインのオフセット */
         }
-        h1 {
-            font-size: 1.5rem;
+        .section {
+            background-color: #FF1493; /* ショッキングピンクの背景 */
+            border-radius: 2.5rem;
+            padding: 3rem;
+            box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.35); /* 強めの内側の影 */
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            border: 6px dashed #00FF00; /* 派手なネオン緑の点線ボーダー */
+            outline: 3px solid #FFFF00; /* 黄色のソリッドアウトライン */
+            outline-offset: 5px;
+        }
+        .button {
+            /* 非常に派手なグラデーションとアニメーション */
+            background-image: linear-gradient(to right, #FF00FF, #FFFF00, #00FFFF, #FF0000); /* 4色の派手なグラデーション */
+            background-size: 300% auto; /* グラデーションのサイズをさらに大きく */
+            color: #000000; /* 黒字でコントラストを強調 */
+            padding: 1.5rem 5rem;
+            border-radius: 2.5rem;
+            font-weight: 900; /* 極太フォント */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out; /* アニメーションを速く */
+            box-shadow: 0 15px 40px rgba(255, 0, 255, 0.8), 0 0 50px rgba(255, 255, 0, 0.7); /* 複数の派手な影 */
+            border: none;
+            outline: none;
+            font-size: 2.2rem; /* 非常に大きなフォント */
+            text-transform: uppercase; /* 大文字 */
+            letter-spacing: 0.2em; /* 文字間隔をさらに広げる */
+            word-spacing: 0.1em; /* 単語間隔も広げる */
+            animation: pulse 0.8s infinite alternate, colorShift 5s infinite linear; /* 脈動と色シフトアニメーション */
+            text-shadow: 3px 3px 0px #FFFF00, -3px -3px 0px #00FFFF, 6px 6px 0px #FF0000; /* 複数の影で読みにくく */
+        }
+        .button:hover {
+            background-position: right center; /* ホバーでグラデーションを移動 */
+            transform: translateY(-10px) scale(1.08) rotate(2deg); /* より大きく跳ねて回転 */
+            box-shadow: 0 20px 60px rgba(255, 0, 255, 0.9), 0 0 70px rgba(255, 255, 0, 0.9);
+        }
+        .button:disabled {
+            background-image: linear-gradient(to right, #a7b0c0, #c4cad4);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            animation: none; /* 無効時はアニメーションを停止 */
+            text-shadow: none;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        @keyframes colorShift {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        h1, h2 {
+            font-family: 'Impact', sans-serif; /* Impactフォントを使用 */
+            color: #8A2BE2; /* 濃いブルーバイオレット */
+            text-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6), -5px -5px 10px #FFFF00; /* 複数の影で読みにくく */
+            font-size: 3.5rem; /* さらに大きなH1 */
+            letter-spacing: 0.1em;
+            word-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        h2 {
+            font-size: 3rem; /* さらに大きなH2 */
         }
         p {
-             font-size: 0.9rem;
+            font-family: 'Impact', sans-serif; /* Impactフォントを使用 */
+            color: #4B0082; /* さらに濃いインディゴ */
+            font-weight: 900;
+            font-size: 1.5rem; /* 大きめのフォント */
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .result-display {
+            font-family: 'Impact', sans-serif; /* Impactフォントを使用 */
+            font-size: 4rem; /* 非常に大きなスコア表示 */
+            font-weight: 900;
+            color: #FF4500; /* 派手なオレンジレッド */
+            text-shadow: 6px 6px 12px rgba(0, 0, 0, 0.7), -6px -6px 12px #00FF00; /* 複数の影で読みにくく */
+            margin-top: 1.5rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
         canvas {
+            border: 8px solid #FF00FF; /* 派手なマゼンタの極太ボーダー */
+            border-radius: 2.5rem;
+            background-color: #32CD32; /* 非常に明るいライムグリーンで背景を強調 */
+            width: 100%;
+            height: 200px; /* さらに横長に設定 */
             display: block;
-            margin: 20px auto;
-            border-radius: 8px;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 3 / 2;
+            margin: 0 auto;
+            touch-action: none;
+            box-shadow: inset 0 0 30px rgba(255,0,255,0.9), 0 0 40px rgba(255,0,255,0.9), 0 0 50px rgba(0,255,0,0.9); /* 複数の光る影 */
+            outline: 5px dashed #FFFF00; /* 黄色の点線アウトライン */
+            outline-offset: 10px;
         }
-         #canvasContainer {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 3 / 2;
-            margin: 20px auto;
-         }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 15px 30px; /* パディングを増やしてボタンを大きく */
-            border: 3px solid #0056b3; /* 濃い青の太いボーダー */
-            border-radius: 8px; /* 角を丸く */
-            cursor: pointer;
-            font-size: 1.2rem; /* フォントサイズを大きく */
-            font-weight: bold; /* 太字に */
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-            width: auto;
-            margin-top: 10px; /* 上部に少しマージン */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 影を追加 */
+        .message-box {
+            position: fixed;
+            top: 10px; /* 上部に寄せる */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FF0000; /* 純粋な赤 */
+            color: #FFFF00; /* 純粋な黄色の文字 */
+            padding: 25px 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+            font-weight: 900; /* 極太フォント */
+            font-size: 1.8rem; /* 非常に大きなフォント */
+            border: 5px solid #00FFFF; /* 純粋なシアンの極太ボーダー */
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
-        button:hover {
-            background-color: #004085; /* ホバー時の背景色 */
-            border-color: #002a55; /* ホバー時のボーダー色 */
-        }
-        #results {
-            margin-top: 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            h1 {
-                font-size: 1.3rem;
-            }
-            p {
-                font-size: 0.8rem;
-            }
-             button {
-                padding: 12px 25px;
-                font-size: 1rem;
-             }
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="font-bold mb-4">短気の短気による短気のためのベンチマーク</h1>
-        <p class="mb-4">「ベンチマーク開始」ボタンを押すと、秒速で結果を表示します。</p>
+        <h1 class="font-bold mb-4">デバイスベンチマーク</h1>
 
-        <div id="canvasContainer"></div>
-
-        <button id="startButton">ベンチマーク開始</button>
-
-        <div id="results">
-            結果: -- FPS
+        <div class="section">
+            <h2 class="font-semibold mb-4">ベンチマーク結果</h2>
+            <div class="flex flex-col md:flex-row justify-around gap-4">
+                <div class="flex-1">
+                    <p class="font-medium">CPUスコア:</p>
+                    <div class="result-display" id="cpuScore">N/A</div>
+                </div>
+                <div class="flex-1">
+                    <p class="font-medium">GPUスコア (FPS):</p>
+                    <div class="result-display" id="gpuScore">N/A</div>
+                </div>
+            </div>
+            <canvas id="gpuCanvas" class="mt-4"></canvas>
         </div>
+
+        <button id="startButton" class="button">ベンチマークを開始</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <div id="messageBox" class="message-box"></div>
 
-    <script>
-        const canvasContainer = document.getElementById('canvasContainer');
+    <script type="module">
+        // Global variables for Firebase configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Function to display a message box
+        function showMessageBox(message, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show'; // Reset classes and add 'show'
+            if (type === 'error') {
+                messageBox.style.backgroundColor = '#FF0000'; // Pure Red for error
+                messageBox.style.borderColor = '#FFFF00'; // Pure Yellow border
+                messageBox.style.color = '#FFFF00'; // Yellow text for error
+            } else {
+                messageBox.style.backgroundColor = '#FF00FF'; // Pure Magenta for success
+                messageBox.style.borderColor = '#00FFFF'; // Pure Cyan border
+                messageBox.style.color = '#FFFFFF'; // White text for success
+            }
+            setTimeout(() => {
+                messageBox.className = 'message-box'; // Hide after 3 seconds
+            }, 3000);
+        }
+
         const startButton = document.getElementById('startButton');
-        const resultsDiv = document.getElementById('results');
+        const cpuScoreDisplay = document.getElementById('cpuScore');
+        const gpuScoreDisplay = document.getElementById('gpuScore');
+        const gpuCanvas = document.getElementById('gpuCanvas');
 
-        // ベンチマーク設定
-        const NUM_OBJECTS = 2000; // 描画する3Dオブジェクトの数
-        const BENCHMARK_DURATION_MS = 5000; // ベンチマーク実行時間 (ミリ秒)
-        const PHYSICS_TIMESTEP = 1 / 60; // 物理シミュレーションのタイムステップ
+        // Three.js and Cannon.js instances
+        let renderer, scene, camera, world;
+        let physicsObjects = [];
+        let animationFrameId; // GPU animation frame ID
 
-        let scene, camera, renderer;
-        let world; // Cannon.jsのワールド
-        let objects = []; // Three.jsのオブジェクト
-        let bodies = []; // Cannon.jsの物理ボディ
-        let isRunning = false;
-        let startTime = 0;
-        let frameCount = 0;
-        let animationFrameId = null;
-        let lastTime = 0;
+        // Benchmark duration in milliseconds
+        const benchmarkDuration = 7000; // 7 seconds
 
-        // Three.jsとCannon.jsのセットアップ
-        function init() {
-            // シーンの作成
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf0f0f0);
-
-            // カメラの作成
-            camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
-            camera.position.set(0, 3, 10); // X=0, Y=3, Z=10 に設定
-
-            // レンダラーの作成
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            canvasContainer.appendChild(renderer.domElement);
-
-            // 光源を追加
-            const ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(1, 1, 1).normalize();
-            scene.add(directionalLight);
-
-            // Cannon.js ワールドの作成
-            world = new CANNON.World();
-            world.gravity.set(0, -200, 0); // 重力設定 (Y軸マイナス方向)
-            world.broadphase = new CANNON.NaiveBroadphase();
-            world.solver.iterations = 10;
-
-            // 地面となる物理ボディを追加
-            const groundShape = new CANNON.Plane();
-            const groundBody = new CANNON.Body({ mass: 0 });
-            groundBody.addShape(groundShape);
-            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-            world.addBody(groundBody);
-
-            // リサイズイベントリスナー
-            window.addEventListener('resize', onWindowResize, false);
-
-             // 初期オブジェクトの作成（ベンチマーク開始前にも一度作成）
-             createObjectsAndBodies();
-             // 初期描画のためにリサイズ処理を一度実行
-             onWindowResize();
-        }
-
-        // オブジェクトと物理ボディを作成する関数
-        function createObjectsAndBodies() {
-             // 既存のオブジェクトとボディを削除
-            for(let i = 0; i < objects.length; i++) {
-                scene.remove(objects[i]);
-                world.removeBody(bodies[i]);
-            }
-            objects = [];
-            bodies = [];
-
-            const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-            const material = new THREE.MeshPhongMaterial();
-            const boxShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.1, 0.1));
-
-            for (let i = 0; i < NUM_OBJECTS; i++) {
-                 const object = new THREE.Mesh(geometry, material.clone());
-                object.position.x = (Math.random() - 0.5) * 5;
-                object.position.y = Math.random() * 2 + 4;
-                object.position.z = (Math.random() - 0.5) * 5;
-                object.material.color.setHSL(Math.random(), 0.7, 0.5);
-                scene.add(object);
-                objects.push(object);
-
-                const body = new CANNON.Body({ mass: 1 });
-                body.addShape(boxShape);
-                body.position.copy(object.position);
-                world.addBody(body);
-                bodies.push(body);
+        // Resize canvas to fit parent element
+        function resizeCanvas() {
+            gpuCanvas.width = gpuCanvas.offsetWidth;
+            gpuCanvas.height = gpuCanvas.offsetHeight;
+            if (renderer && camera) { // Update only if Three.js is initialized
+                renderer.setSize(gpuCanvas.width, gpuCanvas.height);
+                camera.aspect = gpuCanvas.width / gpuCanvas.height;
+                camera.updateProjectionMatrix();
             }
         }
+        window.addEventListener('resize', resizeCanvas);
 
+        // CPU Benchmark function
+        function runCPUBenchmark() {
+            return new Promise(resolve => {
+                cpuScoreDisplay.textContent = '計算中...';
 
-        // ウィンドウリサイズ時の処理
-        function onWindowResize() {
-            const width = canvasContainer.clientWidth;
-            const height = canvasContainer.clientWidth * (2/3);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-            canvasContainer.style.height = height + 'px';
+                let iterationsCompleted = 0;
+                const startTime = performance.now();
+                let dummy = 0;
+
+                // Execute calculations for the specified duration
+                function cpuLoop() {
+                    if (performance.now() - startTime < benchmarkDuration) {
+                        // Perform a complex mathematical operation
+                        dummy += Math.sqrt(Math.sin(iterationsCompleted % 1000) * Math.cos(iterationsCompleted % 1000) + Math.tan(iterationsCompleted % 1000));
+                        iterationsCompleted++;
+                        requestAnimationFrame(cpuLoop); // Use requestAnimationFrame to avoid blocking UI
+                    } else {
+                        const endTime = performance.now();
+                        const timeTaken = endTime - startTime;
+                        const score = Math.round(iterationsCompleted / timeTaken * 1000); // Score proportional to operations per second
+
+                        cpuScoreDisplay.textContent = `${score}`;
+                        resolve(score);
+                    }
+                }
+                cpuLoop();
+            });
         }
 
-        // アニメーションループ
-        function animate(timestamp) {
-            if (!isRunning) return;
+        // GPU Benchmark function
+        function runGPUBenchmark() {
+            return new Promise(resolve => {
+                gpuScoreDisplay.textContent = '描画中...';
 
-            if (startTime === 0) {
-                startTime = timestamp;
-                lastTime = timestamp;
-            }
+                // Three.js setup
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, gpuCanvas.width / gpuCanvas.height, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ canvas: gpuCanvas, antialias: true });
+                renderer.setSize(gpuCanvas.width, gpuCanvas.height);
+                renderer.setClearColor(0x32CD32); // Bright lime green background for canvas
 
-            const elapsed = timestamp - startTime;
-            const delta = (timestamp - lastTime) / 1000;
-            lastTime = timestamp;
+                // Cannon.js setup
+                world = new CANNON.World();
+                world.gravity.set(0, -9.82, 0); // Gravity setting
 
-            if (elapsed < BENCHMARK_DURATION_MS) {
-                world.step(PHYSICS_TIMESTEP, delta, 10);
+                // Create ground
+                const groundShape = new CANNON.Plane();
+                const groundBody = new CANNON.Body({ mass: 0, shape: groundShape });
+                groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); // Orient ground horizontally
+                world.addBody(groundBody);
 
-                for (let i = 0; i < NUM_OBJECTS; i++) {
-                    objects[i].position.copy(bodies[i].position);
-                    objects[i].quaternion.copy(bodies[i].quaternion);
+                const groundMesh = new THREE.Mesh(
+                    new THREE.PlaneGeometry(100, 100),
+                    new THREE.MeshStandardMaterial({ color: 0x800080, side: THREE.DoubleSide }) // Purple ground to clash
+                );
+                groundMesh.rotation.x = -Math.PI / 2;
+                scene.add(groundMesh);
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0x404040);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7);
+                scene.add(directionalLight);
+
+                // Create physics objects (increased count for heavier load)
+                physicsObjects = [];
+                const numObjects = 1000; // Number of main spheres
+                const numHairStrandsPerBall = 30; // Increased number of "hair" particles per ball for more load
+
+                // More clashing and vibrant colors
+                const mainBallColors = [0xFF00FF, 0x00FFFF, 0xFFFF00, 0xFF0000, 0x00FF00, 0x0000FF, 0xFFA500, 0x8A2BE2, 0xFF69B4, 0x32CD32];
+                const hairColors = [0xFFD700, 0x00BFFF, 0x8B008B, 0x4B0082, 0xFF4500, 0x00FF7F, 0xEE82EE, 0x7FFF00];
+
+                const hairGeometry = new THREE.SphereGeometry(0.07, 5, 5); // Smaller spheres for hair, lower segments for performance
+
+                for (let i = 0; i < numObjects; i++) {
+                    const radius = Math.random() * 0.8 + 0.2;
+                    const sphereShape = new CANNON.Sphere(radius);
+                    const sphereBody = new CANNON.Body({ mass: 1, shape: sphereShape });
+                    sphereBody.position.set(
+                        (Math.random() - 0.5) * 20,
+                        20 + i * 0.15, // Stack objects higher, but closer to prevent too much initial spread
+                        (Math.random() - 0.5) * 20
+                    );
+                    world.addBody(sphereBody);
+
+                    const mainBallColor = mainBallColors[Math.floor(Math.random() * mainBallColors.length)];
+                    const objectMaterial = new THREE.MeshStandardMaterial({ color: mainBallColor, roughness: 0.5, metalness: 0.1 });
+                    const sphereGeometry = new THREE.SphereGeometry(radius, 16, 16); // Main sphere segments
+                    const sphereMesh = new THREE.Mesh(sphereGeometry, objectMaterial);
+                    scene.add(sphereMesh); // Add the main sphere to the scene
+
+                    // Add "hair" to the sphereMesh
+                    for (let j = 0; j < numHairStrandsPerBall; j++) {
+                        const hairColor = hairColors[Math.floor(Math.random() * hairColors.length)];
+                        const hairMaterial = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.8, metalness: 0.1 });
+                        const hairMesh = new THREE.Mesh(hairGeometry, hairMaterial);
+                        // Randomly position hair around the main sphere
+                        const angle = Math.random() * Math.PI * 2;
+                        const phi = Math.acos(2 * Math.random() - 1); // For spherical distribution
+                        const x = radius * Math.sin(phi) * Math.cos(angle) * 1.1; // Slightly outside main sphere
+                        const y = radius * Math.sin(phi) * Math.sin(angle) * 1.1;
+                        const z = radius * Math.cos(phi) * 1.1;
+                        hairMesh.position.set(x, y, z);
+                        sphereMesh.add(hairMesh); // Add hair as a child of the main sphere mesh
+                    }
+
+                    physicsObjects.push({ body: sphereBody, mesh: sphereMesh });
                 }
 
-                renderer.render(scene, camera);
-                frameCount++;
-                animationFrameId = requestAnimationFrame(animate);
-            } else {
-                stopBenchmark();
+                // Initial camera position and orientation
+                camera.position.set(0, 15, 30);
+                camera.lookAt(0, 5, 0); // Look slightly above the ground
+
+                let frames = 0;
+                const timeStep = 1 / 60; // Physics simulation step time
+                const startTime = performance.now();
+
+                // Variables for camera control
+                let isDragging = false;
+                let previousMouseX = 0;
+                let previousMouseY = 0;
+                let cameraTheta = Math.PI / 2; // Rotation around Y-axis
+                let cameraPhi = Math.PI / 4;   // Elevation from XZ plane
+                const cameraRadius = 30;
+
+                // Function to update camera position
+                function updateCameraPosition() {
+                    camera.position.x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+                    camera.position.y = cameraRadius * Math.cos(cameraPhi);
+                    camera.position.z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+                    camera.lookAt(0, 5, 0); // Always look at the center
+                }
+
+                // Mouse event listeners
+                gpuCanvas.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    previousMouseX = e.clientX;
+                    previousMouseY = e.clientY;
+                });
+
+                gpuCanvas.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+
+                gpuCanvas.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+
+                    const deltaX = e.clientX - previousMouseX;
+                    const deltaY = e.clientY - previousMouseY;
+
+                    cameraTheta -= deltaX * 0.01;
+                    cameraPhi -= deltaY * 0.01;
+
+                    // Limit camera elevation to prevent inversion
+                    cameraPhi = Math.max(0.1, Math.min(Math.PI - 0.1, cameraPhi));
+
+                    updateCameraPosition();
+
+                    previousMouseX = e.clientX;
+                    previousMouseY = e.clientY;
+                });
+
+                // Touch event listeners (for mobile)
+                gpuCanvas.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    previousMouseX = e.touches[0].clientX;
+                    previousMouseY = e.touches[0].clientY;
+                });
+
+                gpuCanvas.addEventListener('touchend', () => {
+                    isDragging = false;
+                });
+
+                gpuCanvas.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault(); // Prevent scrolling
+
+                    const deltaX = e.touches[0].clientX - previousMouseX;
+                    const deltaY = e.touches[0].clientY - previousMouseY;
+
+                    cameraTheta -= deltaX * 0.01;
+                    cameraPhi -= deltaY * 0.01;
+
+                    cameraPhi = Math.max(0.1, Math.min(Math.PI - 0.1, cameraPhi));
+
+                    updateCameraPosition();
+
+                    previousMouseX = e.touches[0].clientX;
+                    previousMouseY = e.touches[0].clientY;
+                });
+
+                // GPU animation loop
+                function animateGPU() {
+                    world.step(timeStep); // Update physics simulation
+
+                    // Copy Cannon.js body positions and rotations to Three.js meshes
+                    for (let i = 0; i < physicsObjects.length; i++) {
+                        physicsObjects[i].mesh.position.copy(physicsObjects[i].body.position);
+                        physicsObjects[i].mesh.quaternion.copy(physicsObjects[i].body.quaternion);
+                    }
+
+                    renderer.render(scene, camera); // Render the scene
+                    frames++;
+
+                    if (performance.now() - startTime < benchmarkDuration) {
+                        animationFrameId = requestAnimationFrame(animateGPU);
+                    } else {
+                        cancelAnimationFrame(animationFrameId);
+                        const endTime = performance.now();
+                        const timeTaken = endTime - startTime;
+                        const fps = frames / (timeTaken / 1000); // Calculate FPS
+
+                        gpuScoreDisplay.textContent = `${fps.toFixed(2)}`; // Display FPS with 2 decimal places
+
+                        // Dispose of resources to prevent memory leaks
+                        renderer.dispose();
+                        scene.traverse((object) => {
+                            if (!object.isMesh) return;
+                            object.geometry.dispose();
+                            object.material.dispose();
+                        });
+                        // Remove bodies from physics world
+                        while(world.bodies.length > 0){
+                            world.removeBody(world.bodies[0]);
+                        }
+                        resolve(fps);
+                    }
+                }
+                animateGPU(); // Start the animation loop
+            });
+        }
+
+        // Function to start all benchmarks simultaneously
+        async function startAllBenchmarks() {
+            startButton.disabled = true;
+            startButton.textContent = 'ベンチマーク中...'; // Change button text
+            cpuScoreDisplay.textContent = 'N/A';
+            gpuScoreDisplay.textContent = 'N/A';
+
+            try {
+                // Run CPU and GPU benchmarks simultaneously and wait for both to complete
+                await Promise.all([
+                    runCPUBenchmark(),
+                    runGPUBenchmark()
+                ]);
+                showMessageBox('ベンチマークが完了しました！');
+            } catch (error) {
+                console.error('ベンチマーク中にエラーが発生しました:', error);
+                showMessageBox('ベンチマーク中にエラーが発生しました。', 'error');
+            } finally {
+                startButton.textContent = 'ベンチマークを開始'; // Reset button text
+                startButton.disabled = false;
             }
         }
 
-        // ベンチマーク開始
-        function startBenchmark() {
-            if (isRunning) return;
+        // Event listener for the start button
+        startButton.addEventListener('click', startAllBenchmarks);
 
-            isRunning = true;
-            startTime = 0;
-            frameCount = 0;
-            resultsDiv.textContent = "結果: 測定中...";
-            startButton.disabled = true;
-
-            createObjectsAndBodies();
-
-            animate(0);
-        }
-
-        // ベンチマーク停止
-        function stopBenchmark() {
-            isRunning = false;
-            cancelAnimationFrame(animationFrameId);
-
-            const elapsedSeconds = BENCHMARK_DURATION_MS / 1000;
-            const fps = frameCount / elapsedSeconds;
-
-            resultsDiv.textContent = `結果: ${fps.toFixed(2)} FPS`;
-            startButton.disabled = false;
-        }
-
-        // ボタンクリックイベント
-        startButton.addEventListener('click', startBenchmark);
-
-        // ページ読み込み時にThree.jsとCannon.jsを初期化
-        window.onload = init;
-
+        // Adjust canvas size on window load
+        window.onload = () => {
+            resizeCanvas();
+        };
     </script>
 </body>
 </html>
+
