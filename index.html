@@ -3,67 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>簡単なチャット</title>
+    <title>短気の短気による短気のためのベンチマーク</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-        #chat-box {
-            width: 60%;
-            height: 400px;
-            border: 2px solid #ccc;
-            padding: 10px;
-            background-color: white;
-            overflow-y: scroll;
-            margin: 20px auto;
-        }
-        #chat-input {
-            width: 60%;
-            margin: 10px auto;
+            font-family: 'Inter', sans-serif;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-direction: column;
         }
-        #chat-input input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 95%;
+            width: 800px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
-        #chat-input button {
-            padding: 10px;
-            background-color: #4CAF50;
+        h1 {
+            font-size: 1.5rem;
+        }
+        p {
+             font-size: 0.9rem;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 2;
+        }
+         #canvasContainer {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 2;
+            margin: 20px auto;
+         }
+        button {
+            background-color: #007bff;
             color: white;
-            border: none;
-            border-radius: 4px;
+            padding: 15px 30px; /* パディングを増やしてボタンを大きく */
+            border: 3px solid #0056b3; /* 濃い青の太いボーダー */
+            border-radius: 8px; /* 角を丸く */
             cursor: pointer;
+            font-size: 1.2rem; /* フォントサイズを大きく */
+            font-weight: bold; /* 太字に */
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            width: auto;
+            margin-top: 10px; /* 上部に少しマージン */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 影を追加 */
+        }
+        button:hover {
+            background-color: #004085; /* ホバー時の背景色 */
+            border-color: #002a55; /* ホバー時のボーダー色 */
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            p {
+                font-size: 0.8rem;
+            }
+             button {
+                padding: 12px 25px;
+                font-size: 1rem;
+             }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1 class="font-bold mb-4">短気の短気による短気のためのベンチマーク</h1>
+        <p class="mb-4">「ベンチマーク開始」ボタンを押すと、秒速で結果を表示します。</p>
 
-    <div id="chat-box"></div>
+        <div id="canvasContainer"></div>
 
-    <div id="chat-input">
-        <input type="text" id="message" placeholder="メッセージを入力">
-        <button onclick="sendMessage()">送信</button>
+        <button id="startButton">ベンチマーク開始</button>
+
+        <div id="results">
+            結果: -- FPS
+        </div>
     </div>
 
-    <script>
-        const chatBox = document.getElementById('chat-box');
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
 
-        function sendMessage() {
-            const messageInput = document.getElementById('message');
-            const message = messageInput.value;
-            if (message.trim() !== '') {
-                const newMessage = document.createElement('p');
-                newMessage.textContent = `あなた: ${message}`;
-                chatBox.appendChild(newMessage);
-                messageInput.value = '';
-                chatBox.scrollTop = chatBox.scrollHeight; // チャットボックスを最下部にスクロール
+    <script>
+        const canvasContainer = document.getElementById('canvasContainer');
+        const startButton = document.getElementById('startButton');
+        const resultsDiv = document.getElementById('results');
+
+        // ベンチマーク設定
+        const NUM_OBJECTS = 2000; // 描画する3Dオブジェクトの数
+        const BENCHMARK_DURATION_MS = 5000; // ベンチマーク実行時間 (ミリ秒)
+        const PHYSICS_TIMESTEP = 1 / 60; // 物理シミュレーションのタイムステップ
+
+        let scene, camera, renderer;
+        let world; // Cannon.jsのワールド
+        let objects = []; // Three.jsのオブジェクト
+        let bodies = []; // Cannon.jsの物理ボディ
+        let isRunning = false;
+        let startTime = 0;
+        let frameCount = 0;
+        let animationFrameId = null;
+        let lastTime = 0;
+
+        // Three.jsとCannon.jsのセットアップ
+        function init() {
+            // シーンの作成
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+
+            // カメラの作成
+            camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+            camera.position.set(0, 3, 10); // X=0, Y=3, Z=10 に設定
+
+            // レンダラーの作成
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            canvasContainer.appendChild(renderer.domElement);
+
+            // 光源を追加
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            // Cannon.js ワールドの作成
+            world = new CANNON.World();
+            world.gravity.set(0, -200, 0); // 重力設定 (Y軸マイナス方向)
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+
+            // 地面となる物理ボディを追加
+            const groundShape = new CANNON.Plane();
+            const groundBody = new CANNON.Body({ mass: 0 });
+            groundBody.addShape(groundShape);
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            world.addBody(groundBody);
+
+            // リサイズイベントリスナー
+            window.addEventListener('resize', onWindowResize, false);
+
+             // 初期オブジェクトの作成（ベンチマーク開始前にも一度作成）
+             createObjectsAndBodies();
+             // 初期描画のためにリサイズ処理を一度実行
+             onWindowResize();
+        }
+
+        // オブジェクトと物理ボディを作成する関数
+        function createObjectsAndBodies() {
+             // 既存のオブジェクトとボディを削除
+            for(let i = 0; i < objects.length; i++) {
+                scene.remove(objects[i]);
+                world.removeBody(bodies[i]);
+            }
+            objects = [];
+            bodies = [];
+
+            const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+            const material = new THREE.MeshPhongMaterial();
+            const boxShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.1, 0.1));
+
+            for (let i = 0; i < NUM_OBJECTS; i++) {
+                 const object = new THREE.Mesh(geometry, material.clone());
+                object.position.x = (Math.random() - 0.5) * 5;
+                object.position.y = Math.random() * 2 + 4;
+                object.position.z = (Math.random() - 0.5) * 5;
+                object.material.color.setHSL(Math.random(), 0.7, 0.5);
+                scene.add(object);
+                objects.push(object);
+
+                const body = new CANNON.Body({ mass: 1 });
+                body.addShape(boxShape);
+                body.position.copy(object.position);
+                world.addBody(body);
+                bodies.push(body);
             }
         }
-    </script>
 
+
+        // ウィンドウリサイズ時の処理
+        function onWindowResize() {
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientWidth * (2/3);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            canvasContainer.style.height = height + 'px';
+        }
+
+        // アニメーションループ
+        function animate(timestamp) {
+            if (!isRunning) return;
+
+            if (startTime === 0) {
+                startTime = timestamp;
+                lastTime = timestamp;
+            }
+
+            const elapsed = timestamp - startTime;
+            const delta = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (elapsed < BENCHMARK_DURATION_MS) {
+                world.step(PHYSICS_TIMESTEP, delta, 10);
+
+                for (let i = 0; i < NUM_OBJECTS; i++) {
+                    objects[i].position.copy(bodies[i].position);
+                    objects[i].quaternion.copy(bodies[i].quaternion);
+                }
+
+                renderer.render(scene, camera);
+                frameCount++;
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                stopBenchmark();
+            }
+        }
+
+        // ベンチマーク開始
+        function startBenchmark() {
+            if (isRunning) return;
+
+            isRunning = true;
+            startTime = 0;
+            frameCount = 0;
+            resultsDiv.textContent = "結果: 測定中...";
+            startButton.disabled = true;
+
+            createObjectsAndBodies();
+
+            animate(0);
+        }
+
+        // ベンチマーク停止
+        function stopBenchmark() {
+            isRunning = false;
+            cancelAnimationFrame(animationFrameId);
+
+            const elapsedSeconds = BENCHMARK_DURATION_MS / 1000;
+            const fps = frameCount / elapsedSeconds;
+
+            resultsDiv.textContent = `結果: ${fps.toFixed(2)} FPS`;
+            startButton.disabled = false;
+        }
+
+        // ボタンクリックイベント
+        startButton.addEventListener('click', startBenchmark);
+
+        // ページ読み込み時にThree.jsとCannon.jsを初期化
+        window.onload = init;
+
+    </script>
 </body>
 </html>
